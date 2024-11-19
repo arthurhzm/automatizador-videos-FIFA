@@ -1,6 +1,8 @@
 import cv2
 import pytesseract
 from moviepy.video.io.VideoFileClip import VideoFileClip
+from pydub import AudioSegment
+from pydub.silence import detect_nonsilent
 
 # Configuração do Tesseract
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -75,6 +77,14 @@ def extrair_frames_e_detectar_gols(video_path):
     print("Processamento concluído!")
     return timestamps
 
+# Detecção de eventos importantes no áudio
+def detectar_eventos_audio(video_path):
+    print(video_path)
+    audio = AudioSegment.from_file(video_path, format="mp4")
+    nonsilent_ranges = detect_nonsilent(audio, min_silence_len=1000, silence_thresh=-27)
+    audio_timestamps = [(start / 1000, end / 1000) for start, end in nonsilent_ranges]
+    return audio_timestamps
+
 # Cortar trechos do vídeo
 def cortar_trechos(video_path, timestamps, output_folder):
     print("Cortando trechos do vídeo...")
@@ -84,6 +94,7 @@ def cortar_trechos(video_path, timestamps, output_folder):
         start = max(0, timestamp - 5)  # 5 segundos antes do gol
         end = min(clip.duration, timestamp + 5)  # 5 segundos depois do gol
         highlight = clip.subclip(start, end)
+        highlight = highlight.set_audio(clip.audio.subclip(start, end))
         
         output_path = f"{output_folder}/highlight_{i + 1}.mp4"
         highlight.write_videofile(output_path, codec="libx264", audio_codec="aac")
@@ -103,8 +114,16 @@ if __name__ == "__main__":
     gols_detectados = extrair_frames_e_detectar_gols(video_path)
     print(f"Gols detectados: {gols_detectados}")
     
-    # 2. Cortar os trechos de vídeo
-    if gols_detectados:
-        cortar_trechos(video_path, gols_detectados, output_folder)
+
+    # 2. Detectar eventos importantes no áudio
+    eventos_audio = detectar_eventos_audio(video_path)
+    print(f"Eventos de áudio detectados: {eventos_audio}")
+    
+    # 3. Combinar timestamps de gols e eventos de áudio
+    todos_eventos = sorted(set(gols_detectados + eventos_audio))
+    
+    # 4. Cortar os trechos de vídeo
+    if todos_eventos:
+        cortar_trechos(video_path, todos_eventos, output_folder)
     else:
-        print("Nenhum gol detectado.")
+        print("Nenhum evento detectado.")
