@@ -8,7 +8,7 @@ from pydub.silence import detect_nonsilent
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Caminho do vídeo
-video_path = r"C:\Users\arthu\Videos\2024-11-17 18-15-05.mp4"
+video_path = r"C:\Users\arthu\Videos\2024-11-17 17-51-10.mp4"
 output_folder = r"highlights"  # Pasta para salvar os cortes
 placar_region = (330, 50, 360, 118)  # Região do placar no frame
 fps = None  # Inicializa o FPS do vídeo
@@ -51,37 +51,11 @@ def detectar_gol(frame):
             return placar_atual
     return None
 
-# Extração de frames e detecção de gols
-def extrair_frames_e_detectar_gols(video_path):
-    global fps
-    video = cv2.VideoCapture(video_path)
-    fps = video.get(cv2.CAP_PROP_FPS)
-    success, frame = video.read()
-    frame_count = 0
-    
-    print("Processando frames e detectando gols...")
-    
-    while success:
-        # Processa 1 frame por segundo
-        if frame_count % int(fps) == 0:
-            texto_placar = detectar_gol(frame)
-            if texto_placar:
-                timestamp = frame_count / fps
-                print(f"Gol detectado no tempo {timestamp}s: {texto_placar}")
-                timestamps.append((timestamp, texto_placar))  # Salva o tempo em segundos
-            
-        success, frame = video.read()
-        frame_count += 1
-    
-    video.release()
-    print("Processamento concluído!")
-    return timestamps
-
 # Detecção de eventos importantes no áudio
 def detectar_eventos_audio(video_path):
     print(video_path)
     audio = AudioSegment.from_file(video_path, format="mp4")
-    nonsilent_ranges = detect_nonsilent(audio, min_silence_len=1000, silence_thresh=-27)
+    nonsilent_ranges = detect_nonsilent(audio, min_silence_len=1500, silence_thresh=-29, seek_step=1)
     audio_timestamps = [(start / 1000, end / 1000) for start, end in nonsilent_ranges]
     return audio_timestamps
 
@@ -92,7 +66,7 @@ def cortar_trechos(video_path, timestamps, output_folder):
     
     for i, (timestamp, placar) in enumerate(timestamps):
         start = max(0, timestamp - 7)  # 5 segundos antes do gol
-        end = min(clip.duration, timestamp + 5)  # 5 segundos depois do gol
+        end = min(clip.duration, timestamp + 7)  # 5 segundos depois do gol
         highlight = clip.subclip(start, end)
         highlight = highlight.set_audio(clip.audio.subclip(start, end))
         
@@ -111,8 +85,7 @@ if __name__ == "__main__":
         os.makedirs(output_folder)
     
     # 1. Extrair frames e detectar gols
-    gols_detectados = extrair_frames_e_detectar_gols(video_path)
-    print(f"Gols detectados: {gols_detectados}")
+    # print(f"Gols detectados: {gols_detectados}")
     
 
     # 2. Detectar eventos importantes no áudio
@@ -120,7 +93,7 @@ if __name__ == "__main__":
     print(f"Eventos de áudio detectados: {eventos_audio}")
     
     # 3. Combinar timestamps de gols e eventos de áudio
-    todos_eventos = sorted(set(gols_detectados + eventos_audio))
+    todos_eventos = sorted(set([] + eventos_audio))
     
     # 4. Cortar os trechos de vídeo
     if todos_eventos:
