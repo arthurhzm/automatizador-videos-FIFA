@@ -1,9 +1,9 @@
 import cv2
-video_path = r"C:\Users\arthu\Videos\partida.mp4"
+video_path = r"C:\Users\arthu\Videos\2024-11-17 18-15-05.mp4"
 video = cv2.VideoCapture(video_path)
 fps = video.get(cv2.CAP_PROP_FPS) # Frames por segundo
 success, frame = video.read() # Lê o primeiro frame do vídeo  
-placar_region = (200, 50, 360, 118)  # (x1, y1, x2, y2)
+placar_region = (330, 50, 360, 118)  # (x1, y1, x2, y2)
 frame_count = 0
 success, frame = video.read()
 

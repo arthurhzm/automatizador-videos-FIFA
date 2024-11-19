@@ -3,8 +3,11 @@ import cv2
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-image_path = r'frames/frame_232.jpg' 
+image_path = r'frames/frame_5400.jpg' 
 image = cv2.imread(image_path)
+
+# Desenhar um círculo no ponto (0, 0)
+cv2.circle(image, (0, 0), 5, (0, 255, 0), -1)
 
 # Pré-processamento
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  
