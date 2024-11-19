@@ -91,7 +91,7 @@ def cortar_trechos(video_path, timestamps, output_folder):
     clip = VideoFileClip(video_path)
     
     for i, (timestamp, placar) in enumerate(timestamps):
-        start = max(0, timestamp - 5)  # 5 segundos antes do gol
+        start = max(0, timestamp - 7)  # 5 segundos antes do gol
         end = min(clip.duration, timestamp + 5)  # 5 segundos depois do gol
         highlight = clip.subclip(start, end)
         highlight = highlight.set_audio(clip.audio.subclip(start, end))
