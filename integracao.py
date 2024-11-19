@@ -5,9 +5,11 @@ from pydub import AudioSegment
 from pydub.silence import detect_nonsilent
 
 # Configuração do Tesseract
+# Aqui vc tem que trocar pelo caminho que o seu ta instalado
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Caminho do vídeo
+# Aqui vc tem que trocar pelo caminho do vídeo que voce quer analisar
 video_path = r"C:\Users\arthu\Videos\2024-11-17 17-51-10.mp4"
 output_folder = r"highlights"  # Pasta para salvar os cortes
 placar_region = (330, 50, 360, 118)  # Região do placar no frame
